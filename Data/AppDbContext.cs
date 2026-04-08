@@ -11,7 +11,7 @@ namespace TaskBoard.API.Data;
 */
 
 public class AppDbContext : DbContext {
-    public AppDbContext(DbContexOptions<AppDbContext> options) : base(options) { } 
+    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { } 
 
     // Une propriété = une table dans PostgreSQL
     public DbSet<User> Users => Set<User>();// Table des utilisateurs
@@ -70,9 +70,7 @@ public class AppDbContext : DbContext {
                 .WithMany(b => b.Lists) // Un tableau peut avoir plusieurs listes
                 .HasForeignKey(l => l.BoardId) // Clé étrangère dans BoardList
                 .OnDelete(DeleteBehavior.Cascade); // Suppression en cascade
-        }
-        
-        )
+        });
 
         // Card : configuration de l'entité Card pour la base de données
         modelBuilder.Entity<Card>(entity =>

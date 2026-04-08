@@ -9,4 +9,6 @@ public class Label
     // Clé etrangère
     public int BoardId { get; set; }
     public Board Board { get; set; } = null!;
+
+    public ICollection<Card> Cards { get; set; } = new List<Card>();
 }
