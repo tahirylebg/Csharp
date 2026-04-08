@@ -84,4 +84,37 @@ public class AuthService : IAuthService {
         };        
     }
 
+    private string GenerateAccessToken(User user)
+    {
+        var jwtSettings = _configuration.GetSection("JwtSettings"); 
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["SecretKey"]!));
+        var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256); // Crée les revendications (claims) pour le token d'accès, incluant l'identifiant de l'utilisateur, son adresse e-mail et son nom d'utilisateur.
+
+        var claims = new[]
+        {
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim(ClaimTypes.Email, user.Email),
+            new Claim(ClaimTypes.Name, user.Username)
+        };
+
+        var token = new JwtSecurityToken(
+            issuer: jwtSettings["Issuer"],
+            audience: jwtSettings["Audience"],
+            claims: claims,
+            expires: DateTime.UtcNow.AddMinutes(
+                _configuration.GetValue<int>("JwtSettings:AccessTokenExpirationMinutes")), // Définit la durée de validité du token d'accès en fonction des paramètres de configuration.
+            signingCredentials: credentials
+        );
+
+        return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    private string GenerateRefreshToken()
+    {
+        var randomBytes = new byte[64];
+        using var rng = RandomNumberGenerator.Create();
+        rng.GetBytes(randomBytes);
+        return Convert.ToBase64String(randomBytes);
+    }
+
 }
